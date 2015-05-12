@@ -1,0 +1,11 @@
+{
+    "pip_install_list": [ "numpy",
+			  "qiime==1.8.0" ],
+
+    "to_expose_list":   [ "bin/pick_closed_reference_otus.py",
+			  "bin/print_qiime_config.py",
+			  "bin/split_libraries.py",
+			  "bin/pick_open_reference_otus.py",
+			  "bin/split_libraries_fastq.py",
+			  "bin/summarize_taxa_through_plots.py" ]
+}
