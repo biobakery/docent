@@ -1,5 +1,5 @@
 {
-    "pip_install_list": [ "numpy",
+    "pip_install_list": [ "numpy==1.7.1",
 			  "qiime==1.8.0" ],
 
     "to_expose_list":   [ "bin/pick_closed_reference_otus.py",
