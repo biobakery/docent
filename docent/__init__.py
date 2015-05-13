@@ -3,8 +3,6 @@ import sys
 import json
 import subprocess
 import optparse
-from functools import partial
-from cStringIO import StringIO
 
 from . import matcher
 
