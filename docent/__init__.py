@@ -6,6 +6,8 @@ import optparse
 from functools import partial
 from cStringIO import StringIO
 
+from . import matcher
+
 HELP=\
 """
         %prog [ options ] 
@@ -60,6 +62,10 @@ opts_list = [
         '-a', '--virtualenv_args', action="store",
         dest="venv_args", default="",
         help="Specify extra arguments to to virtualenv"),
+    optparse.make_option(
+        '-j', '--jsonspec', action="store",
+        dest="jsonspec", default=None,
+        help="Interpret json-formatted spec file (overridden by cli flags)"),
 ]
 
 
@@ -133,9 +139,15 @@ def install(pip_install_list, to_expose_list, venv_dir=None,
         raise ValueError("List of scripts to expose can't be empty")
 
     log, sh = handle_verbose(verbose)
-    log("Installing virtualenv to {}...", venv_dir or default_venv_name)
-    activate_script = install_venv(sh=sh, path=venv_dir, extra_args=venv_args)
-    log("Done.\n")
+
+    if os.path.exists(os.path.join(venv_dir, "bin", "activate")):
+        log("Virtualenv {} exists. Skipping virtualenv installation.\n",
+            venv_dir)
+    else:
+        log("Installing virtualenv to {}...", venv_dir or default_venv_name)
+        activate_script = install_venv(
+            sh=sh, path=venv_dir, extra_args=venv_args)
+        log("Done.\n")
 
     if any(pip_install_list):
         log("Installing requirements...")
@@ -151,28 +163,43 @@ def install(pip_install_list, to_expose_list, venv_dir=None,
     log("Complete.\n")
 
 
+def error(msg, retcode=1):
+    print >> sys.stderr, str(msg)
+    return retcode
+
 
 def main():
-    if not sys.stdin.isatty():
-        kwargs = json.load(sys.stdin)
-    else:
-        kwargs = {}
-
     opts, args = optparse.OptionParser(
         option_list=opts_list, usage=HELP
     ).parse_args()
+
     defaults = {'pip_install_list': opts.pip_install_list,
                 'to_expose_list': opts.to_expose_list,
                 'venv_dir': opts.venv_dir,
                 'template': opts.template,
                 'verbose': None if opts.quiet else opts.verbose,
                 'venv_args': opts.venv_args}
-    defaults.update(kwargs)
+
+    kwargs = {}
+    if not sys.stdin.isatty():
+        kwargs = json.load(sys.stdin)
+    elif opts.jsonspec:
+        with open(opts.jsonspec) as f:
+            kwargs = json.load(f)
+
+    for key, val in kwargs.iteritems():
+        if key not in defaults:
+            match = matcher.find_match(key, defaults.keys())
+            msg = ("Unrecognized parameter in json spec `{}'. "
+                   "Perhaps you meant `{}'")
+            return error(msg.format(key, match))
+        if not defaults[key]:
+            defaults[key] = val
+
     try:
         install(**defaults)
     except ValueError as e:
-        print >> sys.stderr, str(e)
-        return 1
+        return error(e)
     
 
 if __name__ == '__main__':

@@ -7,5 +7,6 @@
 			  "bin/split_libraries.py",
 			  "bin/pick_open_reference_otus.py",
 			  "bin/split_libraries_fastq.py",
+			  "bin/merge_otu_tables.py",
 			  "bin/summarize_taxa_through_plots.py" ]
 }
