@@ -2,5 +2,7 @@
 type deactivate > /dev/null 2>&1
 [ $? == 0 ] && deactivate
 
-source %(activate_script)s
+test -z $DOCENT_ACTIVATE_SCRIPT && DOCENT_ACTIVATE_SCRIPT=%(activate_script)s
+
+source $DOCENT_ACTIVATE_SCRIPT
 %(name)s "$@"
