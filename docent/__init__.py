@@ -138,9 +138,11 @@ def install(pip_install_list, to_expose_list, venv_dir=None,
 
     log, sh = handle_verbose(verbose)
 
-    if os.path.exists(os.path.join(venv_dir, "bin", "activate")):
+    maybe_exists = os.path.join(venv_dir, "bin", "activate")
+    if os.path.exists(maybe_exists):
         log("Virtualenv {} exists. Skipping virtualenv installation.\n",
             venv_dir)
+        activate_script = maybe_exists
     else:
         log("Installing virtualenv to {}...", venv_dir or default_venv_name)
         activate_script = install_venv(
