@@ -154,6 +154,8 @@ def install(pip_install_list, to_expose_list, venv_dir=None,
         for req_str in pip_install_list:
             sh("source {}; pip install {}".format(activate_script, req_str))
         log("Done.\n")
+    else:
+        log("No requirements to install.\n")
 
     for to_expose in to_expose_list:
         log("Exposing script {}...", to_expose)
